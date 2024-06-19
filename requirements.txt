@@ -1,0 +1,10 @@
+pyrotgfork
+tgcrypto
+motor
+python-dotenv
+aiohttp
+asyncio
+APScheduler
+pytz
+google-generativeai
+deep-translator
