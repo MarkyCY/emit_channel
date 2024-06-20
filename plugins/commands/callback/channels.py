@@ -4,10 +4,6 @@ from pyrogram.types import CallbackQuery
 
 from database.mongodb import get_db
 
-
-#add_channel_{chat_id}_{lang}
-#chat_id = -1002183151015
-#lang = es
 @Client.on_callback_query(filters.regex(r"^add_channel_-?(\d+)_([a-zA-Z]{2})$"))
 async def add_channel_callback(app: Client, query: CallbackQuery):
 
