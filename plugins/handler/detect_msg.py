@@ -1,5 +1,5 @@
 from pyrogram import Client
-from pyrogram.types import Message
+from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio
 from pyrogram import filters
 
 from dotenv import load_dotenv
@@ -31,7 +31,20 @@ async def on_msg_chnl(app: Client, message: Message):
             continue
 
         try:
-            msg = await app.send_message(channel['chat_id'], await translate(message.text, channel['lang']))
+            if message.text:
+                msg = await app.send_message(channel['chat_id'], await translate(message.text, channel['lang']))
+            elif message.media:
+                media = str(message.media).split('.')[1].lower()
+                if media == 'photo':
+                    msg = await app.send_photo(channel['chat_id'], message.photo.file_id, await translate(message.caption, channel['lang']))
+                if media == 'video':
+                    msg = await app.send_video(channel['chat_id'], message.video.file_id, await translate(message.caption, channel['lang']))
+                if media == 'document':
+                    msg = await app.send_document(channel['chat_id'], message.document.file_id, caption = await translate(message.caption, channel['lang']))
+                if media == 'audio':
+                    msg = await app.send_audio(channel['chat_id'], message.audio.file_id, await translate(message.caption, channel['lang']))
+                if media == 'voice':
+                    msg = await app.send_voice(channel['chat_id'], message.voice.file_id, await translate(message.caption, channel['lang']))
         except Exception as e:
             print(e)
             app.send_message(message.chat.id, 'Error al enviar el mensaje.')
@@ -76,6 +89,22 @@ async def on_edit_msg_chnl(app: Client, message: Message):
             continue
 
         try:
-            await app.edit_message_text(msg[1], msg[0], await translate(message.text, channel['lang']))
+            if message.text:
+                await app.edit_message_text(msg[1], msg[0], await translate(message.text, channel['lang']))
+            elif message.media:
+                media = str(message.media).split('.')[1].lower()
+                if media == 'photo':
+                    add_media = InputMediaPhoto(message.photo.file_id, await translate(message.caption, channel['lang']))
+                    await app.edit_message_media(msg[1], msg[0], add_media)
+                if media == 'video':
+                    add_media = InputMediaVideo(message.video.file_id, await translate(message.caption, channel['lang']))
+                    await app.edit_message_media(msg[1], msg[0], add_media)
+                if media == 'document':
+                    add_media = InputMediaDocument(message.document.file_id, await translate(message.caption, channel['lang']))
+                    await app.edit_message_media(msg[1], msg[0], add_media)
+                if media == 'audio':
+                    add_media = InputMediaAudio(message.audio.file_id, await translate(message.caption, channel['lang']))
+                    await app.edit_message_media(msg[1], msg[0], add_media)
+                
         except Exception as e:
             print(e)
