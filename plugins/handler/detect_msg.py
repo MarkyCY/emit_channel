@@ -75,6 +75,7 @@ async def on_msg_chnl(app: Client, message: Message):
     try:
         await Msgs.insert_one({
             'msg_id': msg_id,
+            'chat_id': chat_id,
             'messages_list': msgs_ids
         })
     except Exception as e:
@@ -96,7 +97,7 @@ async def on_edit_msg_chnl(app: Client, message: Message):
     Channel = db.channels
     Msgs = db.messages_saved
 
-    msg_sel = await Msgs.find_one({'msg_id': msg_id})
+    msg_sel = await Msgs.find_one({'msg_id': msg_id, 'chat_id': message.chat.id})
 
     if not msg_sel:
         return

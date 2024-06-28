@@ -25,7 +25,7 @@ async def remove_msgs(app: Client, query: CallbackQuery):
         await app.answer_callback_query(query.id, 'No tienes permisos para hacer eso.', show_alert=True)
         return
     
-    msg_sel = await Msgs.find_one({'msg_id': msg_id})
+    msg_sel = await Msgs.find_one({'msg_id': msg_id, 'chat_id': message.chat.id})
 
     if not msg_sel:
         await app.answer_callback_query(query.id, 'No existe el mensaje en la base de datos.', show_alert=True)
@@ -49,6 +49,6 @@ async def remove_msgs(app: Client, query: CallbackQuery):
         print(e)
         return
     
-    deleted = await Msgs.delete_one({'msg_id': msg_id})
+    deleted = await Msgs.delete_one({'msg_id': msg_id, 'chat_id': message.chat.id})
     print(deleted)
     await app.edit_message_text(message.chat.id, message.id, 'Los mensajes han sido eliminados.', show_alert=True)
