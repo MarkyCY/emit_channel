@@ -1,6 +1,8 @@
 from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 
+from database.mongodb import get_db
+
 iso_lang = [
         'ab', 'aa', 'af', 'ak', 'sq', 'am', 'ar', 'an', 'hy', 'as', 'av', 'ae',
         'ay', 'az', 'ba', 'bm', 'be', 'bn', 'bh', 'bi', 'bo', 'bs', 'br', 'bg',
@@ -48,6 +50,31 @@ async def add_channel_command(app: Client, message: Message):
     await app.send_message(message.chat.id, 'Deseas agregar este canal a la lista de canales?', reply_markup=markup)
 
 
+@Client.on_message(filters.command('change_alfa'))
+async def change_alfa_command(app: Client, message: Message):
+
+    chat_id = message.chat.id
+
+    db = await get_db()
+    Channel = db.channels
+    PChannel = db.principal_channels
+
+    find_chanel = await Channel.find_one({'chat_id': chat_id})
+
+    if not find_chanel:
+        await app.edit_message_text(message.chat.id, message.id, 'El canal no se encuentra en la lista de canales, debes agregarlo con el comando `/add_channel`.')
+        return
+    
+    markup = []
+
+    async for channel in PChannel.find():
+        markup.append([InlineKeyboardButton(channel['name'], callback_data=f'ins_chn_{channel["chat_id"]}_{find_chanel["_id"]}')])
+
+    markup = InlineKeyboardMarkup(markup)
+
+    await app.edit_message_text(message.chat.id, message.id, f"Selecciona a que `Canal Principal` pertenecerá este canal.", reply_markup=markup)
+
+
 @Client.on_message(filters.command('change_lang'))
 async def change_lang_command(app: Client, message: Message):
 
@@ -90,19 +117,29 @@ async def rm_channel_command(app: Client, message: Message):
     await app.send_message(message.chat.id, f"Deseas eliminar este canal a la lista de canales?", reply_markup=markup)
 
 
-@Client.on_message(filters.command('rm_msg'))
-async def rm_msg_command(app: Client, message: Message):
+@Client.on_message(filters.command('add_alfa'))
+async def add_principal_command(app: Client, message: Message):
 
     chat_id = message.chat.id
 
-    if message.reply_to_message is None:
-        await app.send_message(message.chat.id, "Por favor responde a un mensaje para eliminarlo")
-        return
-
     markup = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton('Si', callback_data=f'rm_msg_{chat_id}_{message.reply_to_message.id}'),
+            InlineKeyboardButton('Si', callback_data=f'set_principal_{chat_id}'),
         ],
     ])
 
-    await app.send_message(message.chat.id, f"Deseas eliminar este mensaje de todas partes?", reply_markup=markup)
+    await app.send_message(message.chat.id, f"Deseas establecer este canal como alfa?", reply_markup=markup)
+
+
+@Client.on_message(filters.command('rm_alfa'))
+async def rm_principal_command(app: Client, message: Message):
+
+    chat_id = message.chat.id
+
+    markup = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton('Si', callback_data=f'unset_principal_{chat_id}'),
+        ],
+    ])
+
+    await app.send_message(message.chat.id, f"Deseas quitar este canal de los alfa?", reply_markup=markup)
