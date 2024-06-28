@@ -17,6 +17,7 @@ async def remove_msgs(app: Client, query: CallbackQuery):
     msg_id = int(parts[3])
 
     user_id = query.from_user.id
+    message = query.message
 
     user = await Admins.find_one({'_id': user_id})
 
@@ -48,4 +49,6 @@ async def remove_msgs(app: Client, query: CallbackQuery):
         print(e)
         return
     
-    await app.answer_callback_query(query.id, 'Los mensajes han sido eliminados.', show_alert=True)
+    deleted = await Msgs.delete_one({'msg_id': msg_id})
+    print(deleted)
+    await app.edit_message_text(message.chat.id, message.id, 'Los mensajes han sido eliminados.', show_alert=True)
