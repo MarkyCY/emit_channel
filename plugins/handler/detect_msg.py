@@ -6,16 +6,32 @@ from dotenv import load_dotenv
 from database.mongodb import get_db
 from traduction.translate import translate
 
+import asyncio
+
 load_dotenv()
 
-import os
+async def get_principal_chats():
 
-general_chat = int(os.getenv('CHANNEL_OFFICIAL'))
+    db = await get_db()
+    PChannel = db.principal_channels
+
+    ListChn = []
+
+    async for channel in PChannel.find():
+        ListChn.append(channel['chat_id'])
+
+    return ListChn
 
 
-@Client.on_message(filters.channel & filters.chat(general_chat))
+
+@Client.on_message(filters.channel)
 async def on_msg_chnl(app: Client, message: Message):
+    chat_id = message.chat.id
+    general_chat = await get_principal_chats()
 
+    if chat_id not in general_chat:
+        return
+    
     msg_id = message.id
     msgs_ids = []
 
@@ -24,10 +40,10 @@ async def on_msg_chnl(app: Client, message: Message):
     Msgs = db.messages_saved
 
     i = 0
-    async for channel in Channel.find({}):
+    async for channel in Channel.find({"principal": chat_id}):
         i += 1
 
-        if message.chat.id == channel['chat_id']:
+        if chat_id == channel['chat_id']:
             continue
 
         try:
@@ -67,9 +83,13 @@ async def on_msg_chnl(app: Client, message: Message):
 
 
 
-@Client.on_edited_message(filters.channel & filters.chat(general_chat))
+@Client.on_edited_message(filters.channel)
 async def on_edit_msg_chnl(app: Client, message: Message):
-
+    general_chat = await get_principal_chats()
+    
+    if message.chat.id not in general_chat:
+        return
+    
     msg_id = message.id
 
     db = await get_db()
