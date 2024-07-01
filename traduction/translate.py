@@ -27,7 +27,7 @@ async def translate(text, lang):
 
     print(res)
 
-    return res
+    return res.choices[0].message
 
 #async def translate(text, lang):
 #
