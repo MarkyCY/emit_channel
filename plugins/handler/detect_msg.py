@@ -63,7 +63,7 @@ async def on_msg_chnl(app: Client, message: Message):
                     msg = await app.send_voice(channel['chat_id'], message.voice.file_id, await translate(message.caption, channel['lang']))
         except Exception as e:
             print(e)
-            app.send_message(message.chat.id, 'Error al enviar el mensaje.')
+            await app.send_message(message.chat.id, 'Error al enviar el mensaje.')
             continue
 
         ms_id = msg.id
