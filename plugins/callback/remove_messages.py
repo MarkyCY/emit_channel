@@ -51,4 +51,4 @@ async def remove_msgs(app: Client, query: CallbackQuery):
     
     deleted = await Msgs.delete_one({'msg_id': msg_id, 'chat_id': message.chat.id})
     print(deleted)
-    await app.edit_message_text(message.chat.id, message.id, 'Los mensajes han sido eliminados.', show_alert=True)
+    await app.edit_message_text(message.chat.id, message.id, 'Los mensajes han sido eliminados.')
