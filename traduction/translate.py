@@ -13,7 +13,16 @@ client = OpenAI(api_key=api_key)
 async def translate(text, lang):
     res = client.chat.completions.create(
       model="gpt-3.5-turbo",
-      prompt = f"Devuélveme la traducción de esto al ISO_639-1({lang}): {text}"
+      messages=[
+        {
+          "role": "system",
+          "content": f"Devuélve la traducción del idioma original al ISO_639-1({lang})"
+        },
+        {
+          "role": "user",
+          "content": text
+        }
+      ],
     )
 
     print(res)
