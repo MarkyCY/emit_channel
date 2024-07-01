@@ -16,7 +16,7 @@ async def translate(text, lang):
       messages=[
         {
           "role": "system",
-          "content": f"Devuélve la traducción del idioma original al ISO_639-1({lang})"
+          "content": f"Devuélve la traducción del idioma original al idioma {lang} del ISO_639-1"
         },
         {
           "role": "user",
@@ -25,7 +25,7 @@ async def translate(text, lang):
       ],
     )
 
-    print(res.choices[0].message.content)
+    print("lang: ", lang, res.choices[0].message.content)
 
     return res.choices[0].message.content
 
