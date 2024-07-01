@@ -16,8 +16,7 @@ async def translate(text, lang):
       messages=[
         {
           "role": "system",
-          #"content": f"Devuélve la traducción del idioma original al idioma {lang} del ISO_639-1"
-          "content": f"You will be provided with a sentence, and your task is to translate it into {lang}."
+          "content": f"""You are an expert translator. Your task is to translate the given sentence into {lang} while maintaining the original tone, style, and meaning as closely as possible. Use appropriate vocabulary and grammar to ensure the translation is natural and accurate. Do not translate technical terms such as 'trading', 'blockchain', 'algorithm', etc. Here is the sentence to translate:"""
         },
         {
           "role": "user",
