@@ -1,5 +1,5 @@
 from openai import OpenAI
-#import google.generativeai as genai
+# import google.generativeai as genai
 from dotenv import load_dotenv
 
 import os
@@ -36,33 +36,41 @@ iso_lang_es = {
     'cy': 'Galés', 'wo': 'Wolof', 'yi': 'Yidis', 'yo': 'Yoruba', 'za': 'Chuan', 'zu': 'Zulú'
 }
 
+
 def get_language_name(iso_code):
     return iso_lang_es.get(iso_code, "Error: Código de idioma no válido")
+
 
 api_key = os.getenv('OPENAI_API')
 
 client = OpenAI(api_key=api_key)
 
+
 async def translate(text, lang):
+
+    if lang == "es":
+        print("lang:", lang, text)
+        return text
+
     res = client.chat.completions.create(
-      model="gpt-3.5-turbo",
-      messages=[
-        {
-          "role": "system",
-          "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto:"""
-        },
-        {
-          "role": "user",
-          "content": text
-        }
-      ],
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+              "role": "system",
+              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto:"""
+            },
+            {
+                "role": "user",
+                "content": text
+            }
+        ],
     )
 
     print("lang:", lang, res.choices[0].message.content)
 
     return res.choices[0].message.content
 
-#async def translate(text, lang):
+# async def translate(text, lang):
 #
 #    input_text = f"Traduce esto al ISO_639-1({lang}): {text}"
 #
