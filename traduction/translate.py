@@ -1,4 +1,5 @@
 from openai import OpenAI
+import openai
 #import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -59,7 +60,7 @@ async def translate(text, lang):
         messages=[
             {
               "role": "system",
-              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener en las palabras, el contexto, etiquetas HTML y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto a traducir:"""
+              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto, las etiquetas HTML y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. No traduzcas palabras técnicas al {get_language_name(lang)} y no inventes cosas que no estén en el texto. A continuación el texto:"""
             },
             {
                 "role": "user",
