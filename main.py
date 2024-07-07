@@ -11,8 +11,8 @@ api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('BOT_TOKEN')
 
-from logging import basicConfig, INFO
-basicConfig(format="*%(levelname)s %(message)s", level=INFO, force=True)
+#from logging import basicConfig, INFO
+#basicConfig(format="*%(levelname)s %(message)s", level=INFO, force=True)
 
 plugins = dict(root="plugins")
 app = Client('my_bot',api_id=api_id, api_hash=api_hash, bot_token=bot_token, plugins=plugins)
