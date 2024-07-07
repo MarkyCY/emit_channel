@@ -60,7 +60,7 @@ async def translate(text, lang):
         messages=[
             {
               "role": "system",
-              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto, las etiquetas HTML, respetar las mayusculas y minusculas en cada palabra y que el tono sea lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. No traduzcas palabras técnicas al {get_language_name(lang)} y no inventes cosas que no estén en el texto. A continuación el texto:"""
+              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener el mismo uso de mayúsculas y minúsculas, palabras, el contexto, etiquetas HTML y el tono lo más parecido posible al original. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto a traducir:"""
             },
             {
                 "role": "user",
