@@ -68,7 +68,7 @@ async def translate(text, lang):
         ],
     )
 
-    print("lang:", lang, res.choices[0].message.content)
+    print("lang:", get_language_name(lang), res.choices[0].message.content)
 
     return res.choices[0].message.content
 
