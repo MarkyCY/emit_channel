@@ -1,5 +1,5 @@
 from openai import OpenAI
-# import google.generativeai as genai
+#import google.generativeai as genai
 from dotenv import load_dotenv
 
 import os
@@ -41,6 +41,8 @@ def get_language_name(iso_code):
     return iso_lang_es.get(iso_code, "Error: Código de idioma no válido")
 
 
+#api_key = os.getenv('GEMINI_API')
+
 api_key = os.getenv('OPENAI_API')
 
 client = OpenAI(api_key=api_key)
@@ -57,7 +59,7 @@ async def translate(text, lang):
         messages=[
             {
               "role": "system",
-              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto:"""
+              "content": f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto, etiquetas HTML y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. Conserva y no cambies las etiquetas HTML. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto:"""
             },
             {
                 "role": "user",
@@ -70,15 +72,17 @@ async def translate(text, lang):
 
     return res.choices[0].message.content
 
-# async def translate(text, lang):
+#async def translate(text, lang):
 #
-#    input_text = f"Traduce esto al ISO_639-1({lang}): {text}"
+#    print("Input:", text)
+#    if lang == "es":
+#        return text
 #
 #    genai.configure(api_key=api_key)
-#    model = genai.GenerativeModel('gemini-pro')
-#    res = model.generate_content(input_text)
+#    model = genai.GenerativeModel('gemini-1.5-flash-latest', system_instruction=f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto, etiquetas HTML y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. Conserva y no cambies las etiquetas HTML. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto:""")
+#    res = model.generate_content(text)
 #
-#    print(res)
+#    print("Resp:", res)
 #
 #    response = res.text
 #
