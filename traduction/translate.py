@@ -55,7 +55,7 @@ async def translate(text, lang):
         return text
 
     res = client.chat.completions.create(
-        model="gpt-4.0-turbo",
+        model="gpt-4",
         messages=[
             {
               "role": "system",
