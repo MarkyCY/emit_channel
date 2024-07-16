@@ -26,11 +26,12 @@ async def remove_msgs(app: Client, query: CallbackQuery):
         return
     
     msg_sel = await Msgs.find_one({'msg_id': msg_id, 'chat_id': message.chat.id})
+    
 
     if not msg_sel:
         await app.answer_callback_query(query.id, 'No existe el mensaje en la base de datos.', show_alert=True)
         return
-
+    
     for msg in msg_sel['messages_list']:
 
         channel = await Channel.find_one({'chat_id': msg[1]})
