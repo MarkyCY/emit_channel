@@ -1,5 +1,5 @@
 from pyrogram import Client, enums
-from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio
+from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo, InputMediaDocument, InputMediaAudio, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import filters
 
 from dotenv import load_dotenv
@@ -72,7 +72,7 @@ def convert_entities_to_html(text, entities):
     # Unir todas las partes y retornar el resultado
     return ''.join(parts)
 
-
+#region send
 @Client.on_message(filters.channel)
 async def on_msg_chnl(app: Client, message: Message):
 
@@ -88,6 +88,7 @@ async def on_msg_chnl(app: Client, message: Message):
     db = await get_db()
     Channel = db.channels
     Msgs = db.messages_saved
+    LostMsgs = db.lost_messages
 
     i = 0
     async for channel in Channel.find({"principal": chat_id}):
@@ -96,38 +97,66 @@ async def on_msg_chnl(app: Client, message: Message):
         if chat_id == channel['chat_id']:
             continue
 
+        file_id = None
+        media = None
+
         try:
+
             if message.text:
                 if message.entities:
                     text = convert_entities_to_html(message.text, message.entities)
                 else:
                     text = message.text
-                msg = await app.send_message(channel['chat_id'], await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                text_tr = await translate(text, channel['lang'])
+                msg = await app.send_message(channel['chat_id'], text_tr, parse_mode=enums.ParseMode.HTML)
+
             elif message.media:
 
                 media = str(message.media).split('.')[1].lower()
-                if message.entities:
-                    text = convert_entities_to_html(message.caption, message.entities)
+                if message.caption_entities:
+                    text = convert_entities_to_html(message.caption, message.caption_entities)
                 else:
                     text = message.caption
 
+                text_tr = await translate(text, channel['lang'])
+
                 if media == 'photo':
-                    msg = await app.send_photo(channel['chat_id'], message.photo.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    msg = await app.send_photo(channel['chat_id'], message.photo.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.photo.file_id
                 if media == 'video':
-                    msg = await app.send_video(channel['chat_id'], message.video.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    msg = await app.send_video(channel['chat_id'], message.video.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.video.file_id
                 if media == 'document':
-                    msg = await app.send_document(channel['chat_id'], message.document.file_id, caption = await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    msg = await app.send_document(channel['chat_id'], message.document.file_id, caption = text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.document.file_id
                 if media == 'audio':
-                    msg = await app.send_audio(channel['chat_id'], message.audio.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    msg = await app.send_audio(channel['chat_id'], message.audio.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.audio.file_id
         except Exception as e:
+            
+            lostm = await LostMsgs.insert_one({
+                'general_msg_id': msg_id,
+                'general_chat': chat_id,
+                'chat_id': channel['chat_id'],
+                'media': media,
+                'file_id': file_id,
+                'text': text,
+                'type': 'Send'
+            })
+
+            markup = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton('Volver a intentar', callback_data=f'resend_{lostm.inserted_id}'),
+                ],
+            ])
             print(e)
-            await app.send_message(message.chat.id, 'Error al enviar el mensaje.')
+            await app.send_message(message.chat.id, 'Error al enviar el mensaje.', reply_markup=markup)
             continue
 
         ms_id = msg.id
         ms_chat_id = msg.chat.id
         group = [ms_id, ms_chat_id]
-
+        print(group)
         msgs_ids.append(group)
 
     try:
@@ -141,7 +170,7 @@ async def on_msg_chnl(app: Client, message: Message):
         await app.send_message(message.chat.id, 'Error al insertar el mensaje en la base de datos.')
 
 
-
+#region edit
 @Client.on_edited_message(filters.channel)
 async def on_edit_msg_chnl(app: Client, message: Message):
     general_chat = await get_principal_chats()
@@ -154,6 +183,7 @@ async def on_edit_msg_chnl(app: Client, message: Message):
     db = await get_db()
     Channel = db.channels
     Msgs = db.messages_saved
+    LostMsgs = db.lost_messages
 
     msg_sel = await Msgs.find_one({'msg_id': msg_id, 'chat_id': message.chat.id})
 
@@ -167,33 +197,59 @@ async def on_edit_msg_chnl(app: Client, message: Message):
         if not channel:
             continue
 
+        file_id = None
+        media = None
+
         try:
             if message.text:
                 if message.entities:
                     text = convert_entities_to_html(message.text, message.entities)
                 else:
                     text = message.text
-                await app.edit_message_text(msg[1], msg[0], await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                text_tr = await translate(text, channel['lang'])
+                await app.edit_message_text(msg[1], msg[0], text_tr, parse_mode=enums.ParseMode.HTML)
             elif message.media:
 
                 media = str(message.media).split('.')[1].lower()
-                if message.entities:
-                    text = convert_entities_to_html(message.caption, message.entities)
+                if message.caption_entities:
+                    text = convert_entities_to_html(message.caption, message.caption_entities)
                 else:
                     text = message.caption
 
+                text_tr = await translate(text, channel['lang'])
+
                 if media == 'photo':
-                    add_media = InputMediaPhoto(message.photo.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    add_media = InputMediaPhoto(message.photo.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.photo.file_id
                     await app.edit_message_media(msg[1], msg[0], add_media)
                 if media == 'video':
-                    add_media = InputMediaVideo(message.video.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    add_media = InputMediaVideo(message.video.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.video.file_id
                     await app.edit_message_media(msg[1], msg[0], add_media)
                 if media == 'document':
-                    add_media = InputMediaDocument(message.document.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    add_media = InputMediaDocument(message.document.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.document.file_id
                     await app.edit_message_media(msg[1], msg[0], add_media)
                 if media == 'audio':
-                    add_media = InputMediaAudio(message.audio.file_id, await translate(text, channel['lang']), parse_mode=enums.ParseMode.HTML)
+                    add_media = InputMediaAudio(message.audio.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
+                    file_id = message.audio.file_id
                     await app.edit_message_media(msg[1], msg[0], add_media)
                 
         except Exception as e:
+
+            lostm = await LostMsgs.insert_one({
+                'chat_id': msg[1],
+                'msg_id': msg[0],
+                'text': text,
+                'media': media,
+                'file_id': file_id,
+                'type': 'Edit'
+            })
+            
+            markup = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton('Volver a intentar', callback_data=f'reedit_{lostm.inserted_id}'),
+                ],
+            ])
             print(e)
+            await app.send_message(message.chat.id, 'Error al editar el mensaje.', reply_markup=markup)
