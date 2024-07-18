@@ -107,7 +107,12 @@ async def on_msg_chnl(app: Client, message: Message):
                     text = convert_entities_to_html(message.text, message.entities)
                 else:
                     text = message.text
+
                 text_tr = await translate(text, channel['lang'])
+
+                if text_tr == "ERROR":
+                    return
+                
                 msg = await app.send_message(channel['chat_id'], text_tr, parse_mode=enums.ParseMode.HTML)
 
             elif message.media:
@@ -120,6 +125,9 @@ async def on_msg_chnl(app: Client, message: Message):
 
                 text_tr = await translate(text, channel['lang'])
 
+                if text_tr == "ERROR":
+                    return
+                
                 if media == 'photo':
                     msg = await app.send_photo(channel['chat_id'], message.photo.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
                     file_id = message.photo.file_id
@@ -206,7 +214,12 @@ async def on_edit_msg_chnl(app: Client, message: Message):
                     text = convert_entities_to_html(message.text, message.entities)
                 else:
                     text = message.text
+                    
                 text_tr = await translate(text, channel['lang'])
+
+                if text_tr == "ERROR":
+                    return
+
                 await app.edit_message_text(msg[1], msg[0], text_tr, parse_mode=enums.ParseMode.HTML)
             elif message.media:
 
@@ -218,6 +231,9 @@ async def on_edit_msg_chnl(app: Client, message: Message):
 
                 text_tr = await translate(text, channel['lang'])
 
+                if text_tr == "ERROR":
+                    return
+                
                 if media == 'photo':
                     add_media = InputMediaPhoto(message.photo.file_id, text_tr, parse_mode=enums.ParseMode.HTML)
                     file_id = message.photo.file_id
