@@ -1,5 +1,4 @@
 from openai import OpenAI
-import openai
 #import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -42,14 +41,17 @@ def get_language_name(iso_code):
     return iso_lang_es.get(iso_code, "Error: Código de idioma no válido")
 
 
-#api_key = os.getenv('GEMINI_API')
-
 api_key = os.getenv('OPENAI_API')
 
 client = OpenAI(api_key=api_key)
 
-
 async def translate(text, lang):
+
+    if text is None:
+       return None
+   
+    if text == "":
+        return ""
 
     if lang == "es":
         print("lang:", lang, text)
@@ -73,18 +75,31 @@ async def translate(text, lang):
 
     return res.choices[0].message.content
 
-#async def translate(text, lang):
-#
+
+
+#api_key = os.getenv('GEMINI_API')
+
+# async def translate(text, lang):
+   
+#    if text is None:
+#        return None
+   
+#    if text == "":
+#        return ""
+
+#    if lang == "es":
+#        return text
+
 #    print("Input:", text)
 #    if lang == "es":
 #        return text
-#
+
 #    genai.configure(api_key=api_key)
-#    model = genai.GenerativeModel('gemini-1.5-flash-latest', system_instruction=f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener las palabras, el contexto, etiquetas HTML y el tono lo más parecido posible al original, de forma que la traducción sea un clon de la original pero en otro idioma. Conserva y no cambies las etiquetas HTML. No traduzcas palabras técnicas al {get_language_name(lang)}. A continuación el texto:""")
+#    model = genai.GenerativeModel('gemini-1.5-flash-latest', system_instruction=f"""Traduce el siguiente texto al idioma {get_language_name(lang)}, dejando en inglés las palabras técnicas como 'crypto', 'blockchain', 'trading', y otras relacionadas con este mundo. Asegúrate de mantener el mismo uso de mayúsculas y minúsculas, palabras, el contexto, etiquetas HTML y el tono lo más parecido posible al original. No traduzcas palabras técnicas al {get_language_name(lang)}. No cambies las etiquetas HTML. (IMPORTANTE: Si no se puede traducir el texto, responde únicamente con la palabra "ERROR") A continuación el texto a traducir:""")
 #    res = model.generate_content(text)
-#
-#    print("Resp:", res)
-#
+
+#    print("Resp:", res.text)
+
 #    response = res.text
-#
+
 #    return response
