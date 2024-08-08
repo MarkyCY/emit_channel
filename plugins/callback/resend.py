@@ -15,9 +15,18 @@ async def re_send_msg(app: Client, query: CallbackQuery):
     Msgs = db.messages_saved
     LostMsgs = db.lost_messages
     Channel = db.channels
+    Admins = db.admins
 
     parts = query.data.split('_')
     lostmsg_id = ObjectId(parts[1])
+
+    user_id = query.from_user.id
+
+    user = await Admins.find_one({'_id': user_id})
+
+    if not user:
+        await app.answer_callback_query(query.id, 'No tienes permisos para hacer eso.', show_alert=True)
+        return
 
     try:
         lostmsg = await LostMsgs.find_one({"_id": lostmsg_id})
@@ -54,9 +63,9 @@ async def re_send_msg(app: Client, query: CallbackQuery):
 async def re_edit_msg(app: Client, query: CallbackQuery):
     
     db = await get_db()
-    Msgs = db.messages_saved
     LostMsgs = db.lost_messages
     Channel = db.channels
+    Admins = db.admins
 
     parts = query.data.split('_')
     lostmsg_id = ObjectId(parts[1])
@@ -67,6 +76,14 @@ async def re_edit_msg(app: Client, query: CallbackQuery):
     # 'media': media,
     # 'file_id': file_id,
     # 'type': 'Edit'
+
+    user_id = query.from_user.id
+
+    user = await Admins.find_one({'_id': user_id})
+
+    if not user:
+        await app.answer_callback_query(query.id, 'No tienes permisos para hacer eso.', show_alert=True)
+        return
 
     try:
         lostmsg = await LostMsgs.find_one({"_id": lostmsg_id})
@@ -79,16 +96,16 @@ async def re_edit_msg(app: Client, query: CallbackQuery):
 
         if media is not None:
             if media == 'photo':
-                msg = await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaPhoto(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
+                await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaPhoto(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
             if media == 'video':
-                msg = await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaVideo(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
+                await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaVideo(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
             if media == 'document':
-                msg = await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaDocument(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
+                await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaDocument(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
             if media == 'audio':
                 
-                msg = await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaAudio(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
+                await app.edit_message_media(lostmsg['chat_id'], lostmsg['msg_id'], InputMediaAudio(file_id, text_tr, parse_mode=enums.ParseMode.HTML))
         else:
-            msg = await app.edit_message_text(lostmsg['chat_id'], lostmsg['msg_id'], text_tr, parse_mode=enums.ParseMode.HTML)
+            await app.edit_message_text(lostmsg['chat_id'], lostmsg['msg_id'], text_tr, parse_mode=enums.ParseMode.HTML)
     
     except Exception as e:
         await app.answer_callback_query(query.id, 'Error al re-editar el mensaje.')
