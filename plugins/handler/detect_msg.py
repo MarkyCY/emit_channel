@@ -5,8 +5,9 @@ from pyrogram import filters
 from dotenv import load_dotenv
 from database.mongodb import get_db
 from traduction.translate import translate
+from traduction.g_translate import google_translate
 
-import asyncio
+import re
 
 load_dotenv()
 
@@ -108,7 +109,13 @@ async def on_msg_chnl(app: Client, message: Message):
                 else:
                     text = message.text
 
-                text_tr = await translate(text, channel['lang'])
+                word_count = len(text.split())
+                if not bool(re.search(r'[A-Za-z]', text)):
+                        text_tr = text
+                elif word_count <= 5:
+                    text_tr = await google_translate(text, "es", channel['lang'])
+                else:
+                    text_tr = await translate(text, channel['lang'])
 
                 if text_tr == "ERROR":
                     return
@@ -123,7 +130,13 @@ async def on_msg_chnl(app: Client, message: Message):
                 else:
                     text = message.caption
 
-                text_tr = await translate(text, channel['lang'])
+                word_count = len(text.split())
+                if not bool(re.search(r'[A-Za-z]', text)):
+                        text_tr = text
+                elif word_count <= 5:
+                    text_tr = await google_translate(text, "es", channel['lang'])
+                else:
+                    text_tr = await translate(text, channel['lang'])
 
                 if text_tr == "ERROR":
                     return
@@ -215,7 +228,13 @@ async def on_edit_msg_chnl(app: Client, message: Message):
                 else:
                     text = message.text
                     
-                text_tr = await translate(text, channel['lang'])
+                word_count = len(text.split())
+                if not bool(re.search(r'[A-Za-z]', text)):
+                        text_tr = text
+                elif word_count <= 5:
+                    text_tr = await google_translate(text, "es", channel['lang'])
+                else:
+                    text_tr = await translate(text, channel['lang'])
 
                 if text_tr == "ERROR":
                     return
@@ -229,7 +248,13 @@ async def on_edit_msg_chnl(app: Client, message: Message):
                 else:
                     text = message.caption
 
-                text_tr = await translate(text, channel['lang'])
+                word_count = len(text.split())
+                if not bool(re.search(r'[A-Za-z]', text)):
+                        text_tr = text
+                elif word_count <= 5:
+                    text_tr = await google_translate(text, "es", channel['lang'])
+                else:
+                    text_tr = await translate(text, channel['lang'])
 
                 if text_tr == "ERROR":
                     return
